@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HW 3 Task 1</title>
+    <style>
+        table {
+            font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif, serif;
+            font-size: 14px;
+            width: 640px;
+            text-align: left;
+            border-collapse: collapse;
+            background: #252F48;
+            margin: 10px;
+        }
+
+        table th {
+            color: #EDB749;
+            border-bottom: 1px solid #37B5A5;
+            padding: 12px 17px;
+        }
+
+        table td {
+            color: #CAD4D6;
+            border-bottom: 1px solid #37B5A5;
+            border-right: 1px solid #37B5A5;
+            padding: 7px 17px;
+        }
+
+        table tr:last-child td {
+            border-bottom: none;
+        }
+
+        table td:last-child {
+            border-right: none;
+        }
+
+        table tr:hover td {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div id="usersTable"></div>
+</body>
+
+<script>
+    (function () {
+        function DataTable(config, data) {
+            const table = document.createElement('table');
+
+            const headerTable = table.createTHead()
+            const bodyTable = table.createTBody()
+
+            const headerTr = headerTable.insertRow()
+            headerTr.insertCell().innerHTML = '№'
+
+            config['columns'].forEach(function (column, index) {
+                const headerTd = headerTr.insertCell()
+                headerTd.innerHTML = column['title']
+
+                data.forEach(function (user, index) {
+                    const bodyTr = bodyTable.rows.item(index) ?? bodyTable.insertRow(index)
+                    const bodyTd = bodyTr.cells.item(0) ?? bodyTr.insertCell(0);
+
+                    bodyTd.innerHTML = user['id']
+
+                    bodyTr
+                        .insertCell(headerTd.cellIndex)
+                        .innerHTML = user[column['value']] ?? ''
+                })
+            })
+
+            document.getElementById(config['parent'].substr(1)).appendChild(table);
+        }
+
+
+        const config1 = {
+            parent: '#usersTable',
+            columns: [
+                {title: 'Имя', value: 'name'},
+                {title: 'Фамилия', value: 'surname'},
+                {title: 'Возраст', value: 'age'},
+                {title: 'Test', value: 'test'},
+            ]
+        };
+
+        const users = [
+            {id: 30050, name: 'Вася', surname: 'Петров', age: 12, test: 'test'},
+            {id: 30051, name: 'Вася', surname: 'Васечкин', age: 15},
+            {id: 30052, name: 'Петя', surname: 'Куличов', age: 11},
+            {id: 30050, name: 'Вася', surname: 'Петров', age: 12},
+            {id: 30051, name: 'Вася', surname: 'Васечкин', age: 15},
+            {id: 30052, name: 'Петя', surname: 'Куличов', age: 11},
+            {id: 30050, name: 'Вася', surname: 'Петров', age: 12, test: 'test'},
+            {id: 30051, name: 'Вася', surname: 'Васечкин', age: 20},
+            {id: 30052, name: 'Петя', surname: 'Куличов', age: 11},
+        ];
+
+        DataTable(config1, users);
+    })();
+
+</script>
+</html>
