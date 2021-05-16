@@ -41,12 +41,70 @@
     </style>
 </head>
 <body>
+<button id="add">add</button>
 <div id="usersTable"></div>
 </body>
 
 <script>
     (function () {
-        function DataTable(config, data) {
+
+        document.getElementById('add').addEventListener('click', function () {
+            const tr = document.createElement('tr');
+
+            tr.insertCell().innerHTML = 'aвто';
+
+            config1['columns'].forEach(function (value, index) {
+                const input = document.createElement('input')
+                input.id = value['value']
+                input.addEventListener('keydown', function (e) {
+                    if (e.keyCode === 13) {
+                        const data = [...document.getElementsByTagName("input")].reduce(function (acc, v) {
+                            acc[v.id] = v.value
+                            return acc
+                        }, {})
+
+                        addUser(config1['apiUrl'], data).then(function () {
+                            window.location.reload()
+                        })
+                    }
+                })
+
+                tr.insertCell(index + 1).appendChild(input);
+            })
+
+            document.getElementById('usersTable').children[0].prepend(tr)
+        })
+
+
+        async function addUser(url, data) {
+            console.log(JSON.stringify(data))
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+
+            return await response.json();
+        }
+
+
+        async function getUsers(url) {
+            const response = await fetch(url)
+
+            return await response.json();
+        }
+
+        async function deleteUserById(url, id) {
+            const response = await fetch(`${url}/${id}`, {
+                method: 'DELETE',
+            });
+
+            return await response.json();
+        }
+
+        function DataTable(config) {
             const table = document.createElement('table');
 
             const headerTable = table.createTHead()
@@ -55,23 +113,42 @@
             const headerTr = headerTable.insertRow()
             headerTr.insertCell().innerHTML = '№'
 
-            config['columns'].forEach(function (column, index) {
-                const headerTd = headerTr.insertCell()
-                headerTd.innerHTML = column['title']
+            const lastColumnIndex = config['columns'].length + 1
 
-                data.forEach(function (user, index) {
-                    const bodyTr = bodyTable.rows.item(index) ?? bodyTable.insertRow(index)
-                    const bodyTd = bodyTr.cells.item(0) ?? bodyTr.insertCell(0);
+            getUsers(config['apiUrl']).then(function (data) {
+                config['columns'].forEach(function (column) {
+                    const headerTd = headerTr.insertCell()
+                    headerTd.innerHTML = column['title']
+                    Object.entries(data.data).forEach(function (user, index) {
+                        const bodyTr = bodyTable.rows.item(index) ?? bodyTable.insertRow(index)
+                        const bodyTd = bodyTr.cells.item(0) ?? bodyTr.insertCell(0);
 
-                    bodyTd.innerHTML = user['id']
+                        bodyTd.innerHTML = user[0]
 
-                    bodyTr
-                        .insertCell(headerTd.cellIndex)
-                        .innerHTML = user[column['value']] ?? ''
-                })
-            })
+                        bodyTr
+                            .insertCell(headerTd.cellIndex)
+                            .innerHTML = user[1][column['value']] ?? ''
 
-            document.getElementById(config['parent'].substr(1)).appendChild(table);
+                        if (headerTd.cellIndex + 1 === lastColumnIndex) {
+                            const btn = document.createElement('button');
+                            btn.innerHTML = 'delete'
+
+                            btn.addEventListener("click", function () {
+                                deleteUserById(config['apiUrl'], user['id'])
+                                    .then(function () {
+                                        window.location.reload()
+                                    });
+                            })
+
+                            bodyTr.insertCell(lastColumnIndex).appendChild(btn);
+                        }
+                    });
+                });
+
+                headerTr.insertCell().innerHTML = 'Действия'
+
+                document.getElementById(config['parent'].substr(1)).appendChild(table);
+            });
         }
 
 
@@ -80,24 +157,13 @@
             columns: [
                 {title: 'Имя', value: 'name'},
                 {title: 'Фамилия', value: 'surname'},
-                {title: 'Возраст', value: 'age'},
-                {title: 'Test', value: 'test'},
-            ]
+                {title: 'Фото', value: 'avatar'},
+                {title: 'День рождения', value: 'birthday'},
+            ],
+            apiUrl: "https://mock-api.shpp.me/oizovita/users"
         };
 
-        const users = [
-            {id: 30050, name: 'Вася', surname: 'Петров', age: 12, test: 'test'},
-            {id: 30051, name: 'Вася', surname: 'Васечкин', age: 15},
-            {id: 30052, name: 'Петя', surname: 'Куличов', age: 11},
-            {id: 30050, name: 'Вася', surname: 'Петров', age: 12},
-            {id: 30051, name: 'Вася', surname: 'Васечкин', age: 15},
-            {id: 30052, name: 'Петя', surname: 'Куличов', age: 11},
-            {id: 30050, name: 'Вася', surname: 'Петров', age: 12, test: 'test'},
-            {id: 30051, name: 'Вася', surname: 'Васечкин', age: 20},
-            {id: 30052, name: 'Петя', surname: 'Куличов', age: 11},
-        ];
-
-        DataTable(config1, users);
+        DataTable(config1);
     })();
 
 </script>
