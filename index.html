@@ -50,30 +50,16 @@
 
         class ApiSdk {
 
-            /**
-             * Constructor
-             * @param url
-             */
             constructor(url) {
                 this.url = url;
             }
 
-            /**
-             * Get users
-             * @returns {Promise<any>}
-             */
             async getUsers() {
                 const response = await fetch(this.url)
 
                 return await response.json();
             }
 
-            /**
-             * Delete user by id
-             *
-             * @param id
-             * @returns {Promise<any>}
-             */
             async deleteUserById(id) {
                 const response = await fetch(`${this.url}/${id}`, {
                     method: 'DELETE',
@@ -82,11 +68,6 @@
                 return await response.json();
             }
 
-            /**
-             * Add user
-             * @param data
-             * @returns {Promise<any>}
-             */
             async addUser(data) {
                 const response = await fetch(this.url, {
                     method: 'POST',
